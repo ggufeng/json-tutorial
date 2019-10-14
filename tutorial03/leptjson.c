@@ -86,6 +86,23 @@ static int lept_parse_number(lept_context* c, lept_value* v) {
     return LEPT_PARSE_OK;
 }
 
+inline
+char lept_get_escape_char(const char c)
+{
+	switch (c) {  
+	case '\"': return '\"';
+	case '\\' : return '\\';
+	case '\/' : return '\/';
+	case 'b': return '\b';
+	case 'f': return '\f';
+	case 'n': return '\n';
+	case 'r': return '\r';
+	case 't': return '\t';
+	default:
+	return '\0';
+	}
+}
+
 static int lept_parse_string(lept_context* c, lept_value* v) {
     size_t head = c->top, len;
     const char* p;
@@ -94,6 +111,13 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
     for (;;) {
         char ch = *p++;
         switch (ch) {
+			case '\\':
+				ch = *p++;
+				ch = lept_get_escape_char(ch);
+				if (ch == '\0')
+					return LEPT_PARSE_MISS_QUOTATION_MARK;
+				PUTC(c, ch);
+				break;
             case '\"':
                 len = c->top - head;
                 lept_set_string(v, (const char*)lept_context_pop(c, len), len);
