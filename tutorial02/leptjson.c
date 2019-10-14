@@ -41,13 +41,12 @@ static int lept_parse_true(lept_context* c, lept_value* v) {
     return LEPT_PARSE_OK;
 }
 
-static int lept_is_digit(const char c) {
-	return c >= '0' && c <= '9';
-}
+#define ISDIGIT(ch)         ((ch) >= '0' && (ch) <= '9')
+#define ISDIGIT1TO9(ch)     ((ch) >= '1' && (ch) <= '9')
 
 static const char* lept_skip_digits(const char* c)
 {
-	while(lept_is_digit(*c))
+	while(ISDIGIT(*c))
 	{
 		c++;
 	}
@@ -59,7 +58,7 @@ static int lept_is_non_negative_valid(const char* p)
 	// check int
 	if (*p == '0')
 		p++;
-	else if (lept_is_digit(*p))
+	else if (ISDIGIT1TO9(*p))
 	{
 		p = lept_skip_digits(p);
 	}
@@ -70,7 +69,7 @@ static int lept_is_non_negative_valid(const char* p)
 	if (*p == '.') 
 	{
 		p++;
-		if (!lept_is_digit(*p))
+		if (!ISDIGIT(*p))
 			return 0;
 		p = lept_skip_digits(p);
 	} 
@@ -81,7 +80,7 @@ static int lept_is_non_negative_valid(const char* p)
 		p++;
 		if (*p == '-' || *p == '+')
 			p++;
-		if (!lept_is_digit(*p))
+		if (!ISDIGIT(*p))
 			return 0;
 		p = lept_skip_digits(p);
 	}
