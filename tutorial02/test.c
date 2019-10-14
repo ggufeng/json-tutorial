@@ -70,6 +70,14 @@ static void test_parse_number() {
     TEST_NUMBER(1.234E+10, "1.234E+10");
     TEST_NUMBER(1.234E-10, "1.234E-10");
     TEST_NUMBER(0.0, "1e-10000"); /* must underflow */
+	// Min. subnormal positive double
+    TEST_NUMBER(4.9406564584124654E-324, "4.9406564584124654E-324");
+	// Max. subnormal positive double
+    TEST_NUMBER(2.2250738585072009E-308, "2.2250738585072009E-308");
+	// Max. normal positive double
+    TEST_NUMBER(2.2250738585072014E-308, "2.2250738585072014E-308");
+	// Max. double
+    TEST_NUMBER(1.7976931348623157E-308, "1.7976931348623157E-308");
 }
 
 #define TEST_ERROR(error, json)\
