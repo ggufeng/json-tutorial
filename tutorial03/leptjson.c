@@ -103,6 +103,8 @@ char lept_get_escape_char(const char c)
 	}
 }
 
+#define IS_VALID_CHAR(ch) ((ch) > '\x1F')
+
 static int lept_parse_string(lept_context* c, lept_value* v) {
     size_t head = c->top, len;
     const char* p;
@@ -115,7 +117,10 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
 				ch = *p++;
 				ch = lept_get_escape_char(ch);
 				if (ch == '\0')
-					return LEPT_PARSE_MISS_QUOTATION_MARK;
+				{
+					c->top = head;
+					return LEPT_PARSE_INVALID_STRING_ESCAPE;
+				}
 				PUTC(c, ch);
 				break;
             case '\"':
@@ -127,6 +132,8 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
                 c->top = head;
                 return LEPT_PARSE_MISS_QUOTATION_MARK;
             default:
+				if (!IS_VALID_CHAR(ch))
+					return LEPT_PARSE_INVALID_STRING_CHAR;
                 PUTC(c, ch);
         }
     }
