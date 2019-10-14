@@ -53,8 +53,12 @@ static const char* lept_skip_digits(const char* c)
 	return c;
 }
 
-static int lept_is_non_negative_valid(const char* p)
+static const char* lept_check_number(const char* c)
 {
+	const char* p = c;
+	if (*p == '-')
+		p++;
+
 	// check int
 	if (*p == '0')
 		p++;
@@ -63,14 +67,14 @@ static int lept_is_non_negative_valid(const char* p)
 		p = lept_skip_digits(p);
 	}
 	else
-		return 0;
+		return c;
 
 	// has frac?
 	if (*p == '.') 
 	{
 		p++;
 		if (!ISDIGIT(*p))
-			return 0;
+			return c;
 		p = lept_skip_digits(p);
 	} 
 
@@ -81,31 +85,27 @@ static int lept_is_non_negative_valid(const char* p)
 		if (*p == '-' || *p == '+')
 			p++;
 		if (!ISDIGIT(*p))
-			return 0;
+			return c;
 		p = lept_skip_digits(p);
 	}
 
 	// now should be end of the string.
-	if (*p == '\0') 
-		return 1;
+	if (*p == '\0' || *p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
+		return p;
 	else
-		return 0;
+		return c;
 }
 
 static int lept_parse_number(lept_context* c, lept_value* v) {
-    char* end;
     /* validate number */
 	const char* p = c->json;
-	if (*p == '-')
-		p++;
 
-	if (!lept_is_non_negative_valid(p))
+	p = lept_check_number(p);
+	if (p == c->json)
 		return LEPT_PARSE_INVALID_VALUE;
 
-    v->n = strtod(c->json, &end);
-    if (c->json == end)
-        return LEPT_PARSE_INVALID_VALUE;
-    c->json = end;
+    v->n = strtod(c->json, NULL);
+	c->json = p;
     v->type = LEPT_NUMBER;
     return LEPT_PARSE_OK;
 }
