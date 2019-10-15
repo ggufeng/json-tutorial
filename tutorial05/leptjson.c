@@ -183,6 +183,14 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
 
 static int lept_parse_value(lept_context* c, lept_value* v);
 
+#define CLEAR_TEMP_IN_STACK(size, c)\
+			while ((size) != 0)\
+			{\
+				lept_value* m = lept_context_pop(c, sizeof(lept_value));\
+				lept_free(m);\
+				--(size);\
+			}
+
 static int lept_parse_array(lept_context* c, lept_value* v) {
     size_t size = 0;
     int ret;
@@ -200,7 +208,11 @@ static int lept_parse_array(lept_context* c, lept_value* v) {
         lept_init(&e);
 		lept_parse_whitespace(c);
         if ((ret = lept_parse_value(c, &e)) != LEPT_PARSE_OK)
+        {
+			lept_free(&e);
+			CLEAR_TEMP_IN_STACK(size, c);
             return ret;
+        }
         memcpy(lept_context_push(c, sizeof(lept_value)), &e, sizeof(lept_value));
         size++;
 		lept_parse_whitespace(c);
@@ -214,8 +226,10 @@ static int lept_parse_array(lept_context* c, lept_value* v) {
             memcpy(v->u.a.e = (lept_value*)malloc(size), lept_context_pop(c, size), size);
             return LEPT_PARSE_OK;
         }
-        else
+        else {
+			CLEAR_TEMP_IN_STACK(size, c);
             return LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
+		}
     }
 }
 
