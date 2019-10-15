@@ -258,9 +258,12 @@ void lept_free(lept_value* v) {
         free(v->u.s.s);
 	else if (v->type == LEPT_ARRAY)
 	{
+		for (int i = 0; i < v->u.a.size; ++i)
+		{
+			lept_free(lept_get_array_element(v, i));
+		}
 		if (v->u.a.e != NULL)
 		{
-			lept_free(v->u.a.e);
 			free(v->u.a.e);
 			v->u.a.e = NULL;
 		}

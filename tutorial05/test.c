@@ -136,6 +136,7 @@ static void test_parse_string() {
 
 static void test_parse_array() {
     lept_value v;
+	lept_value* e, *m;
 
     lept_init(&v);
     EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, "[ ]"));
@@ -147,7 +148,6 @@ static void test_parse_array() {
     EXPECT_EQ_INT(LEPT_ARRAY, lept_get_type(&v));
     EXPECT_EQ_SIZE_T(5, lept_get_array_size(&v));
 
-	lept_value* e, *m;
 
 	e = lept_get_array_element(&v, 0);
     EXPECT_EQ_INT(LEPT_NULL, lept_get_type(e));
@@ -362,7 +362,7 @@ int main() {
 #ifdef _WINDOWS
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	_CrtSetBreakAlloc(126);
+	//_CrtSetBreakAlloc(115);
     _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
     _CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
 #endif
