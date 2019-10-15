@@ -115,6 +115,7 @@ static int lept_parse_string(lept_context* c, lept_value* v) {
         switch (ch) {
 			case '\\':
 				ch = *p++;
+				// can be more directly as the solution
 				ch = lept_get_escape_char(ch);
 				if (ch == '\0')
 				{

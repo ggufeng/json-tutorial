@@ -220,9 +220,6 @@ static void test_access_string() {
 }
 
 static void test_parse() {
-    test_access_boolean();
-    test_access_number();
-	return;
     test_parse_null();
     test_parse_true();
     test_parse_false();
