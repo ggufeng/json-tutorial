@@ -127,6 +127,13 @@ static void test_parse_string() {
     TEST_STRING("\xF0\x9D\x84\x9E", "\"\\ud834\\udd1e\"");  /* G clef sign U+1D11E */
 }
 
+#define TEST_NUMBER_ELEMENT(expect, index, value_pointer)\
+    do {\
+		lept_value* m = lept_get_array_element(value_pointer, index);\
+		EXPECT_EQ_INT(LEPT_NUMBER, lept_get_type(m));\
+		EXPECT_EQ_DOUBLE(expect, lept_get_number(m));\
+    } while(0)
+
 static void test_parse_array() {
     lept_value v;
 
@@ -134,6 +141,55 @@ static void test_parse_array() {
     EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, "[ ]"));
     EXPECT_EQ_INT(LEPT_ARRAY, lept_get_type(&v));
     EXPECT_EQ_SIZE_T(0, lept_get_array_size(&v));
+    lept_free(&v);
+
+	EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, "[ null , false , true , 123 , \\\"abc\\\" ]"));
+    EXPECT_EQ_INT(LEPT_ARRAY, lept_get_type(&v));
+    EXPECT_EQ_SIZE_T(5, lept_get_array_size(&v));
+
+	lept_value* e, *m;
+
+	e = lept_get_array_element(&v, 0);
+    EXPECT_EQ_INT(LEPT_NULL, lept_get_type(e));
+
+	e = lept_get_array_element(&v, 1);
+    EXPECT_FALSE(lept_get_boolean(e));
+
+	e = lept_get_array_element(&v, 2);
+    EXPECT_TRUE(lept_get_boolean(e));
+
+	e = lept_get_array_element(&v, 3);
+	EXPECT_EQ_INT(LEPT_NUMBER, lept_get_type(e));
+	EXPECT_EQ_DOUBLE(123., lept_get_number(&v));
+
+	e = lept_get_array_element(&v, 4);
+	EXPECT_EQ_INT(LEPT_STRING, lept_get_type(e));
+	EXPECT_EQ_STRING("abc", lept_get_string(e), lept_get_string_length(&v));
+
+    lept_free(&v);
+
+	EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, "[ [ ] , [ 0 ] , [ 0 , 1 ] , [ 0 , 1 , 2 ] ]"));
+    EXPECT_EQ_INT(LEPT_ARRAY, lept_get_type(&v));
+    EXPECT_EQ_SIZE_T(4, lept_get_array_size(&v));
+
+	e = lept_get_array_element(&v, 0);
+    EXPECT_EQ_INT(LEPT_ARRAY, lept_get_type(e));
+
+	e = lept_get_array_element(&v, 1);
+    EXPECT_EQ_INT(LEPT_ARRAY, lept_get_type(e));
+	TEST_NUMBER_ELEMENT(0., 0, e);
+
+	e = lept_get_array_element(&v, 2);
+    EXPECT_EQ_INT(LEPT_ARRAY, lept_get_type(e));
+	TEST_NUMBER_ELEMENT(0., 0, e);
+	TEST_NUMBER_ELEMENT(1., 1, e);
+
+	e = lept_get_array_element(&v, 3);
+    EXPECT_EQ_INT(LEPT_ARRAY, lept_get_type(e));
+	TEST_NUMBER_ELEMENT(0., 0, e);
+	TEST_NUMBER_ELEMENT(1., 1, e);
+	TEST_NUMBER_ELEMENT(2., 2, e);
+
     lept_free(&v);
 }
 
