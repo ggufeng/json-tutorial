@@ -206,18 +206,18 @@ static int lept_parse_array(lept_context* c, lept_value* v) {
     for (;;) {
         lept_value e;
         lept_init(&e);
-		lept_parse_whitespace(c);
         if ((ret = lept_parse_value(c, &e)) != LEPT_PARSE_OK)
         {
-			lept_free(&e);
-			CLEAR_TEMP_IN_STACK(size, c);
-            return ret;
+			break;
         }
         memcpy(lept_context_push(c, sizeof(lept_value)), &e, sizeof(lept_value));
         size++;
 		lept_parse_whitespace(c);
         if (*c->json == ',')
+        {
             c->json++;
+			lept_parse_whitespace(c);
+        }
         else if (*c->json == ']') {
             c->json++;
             v->type = LEPT_ARRAY;
@@ -227,10 +227,12 @@ static int lept_parse_array(lept_context* c, lept_value* v) {
             return LEPT_PARSE_OK;
         }
         else {
-			CLEAR_TEMP_IN_STACK(size, c);
-            return LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
+            ret = LEPT_PARSE_MISS_COMMA_OR_SQUARE_BRACKET;
+			break;
 		}
     }
+	CLEAR_TEMP_IN_STACK(size, c);
+	return ret;
 }
 
 static int lept_parse_value(lept_context* c, lept_value* v) {
