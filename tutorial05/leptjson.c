@@ -256,6 +256,15 @@ void lept_free(lept_value* v) {
     assert(v != NULL);
     if (v->type == LEPT_STRING)
         free(v->u.s.s);
+	else if (v->type == LEPT_ARRAY)
+	{
+		if (v->u.a.e != NULL)
+		{
+			lept_free(v->u.a.e);
+			free(v->u.a.e);
+			v->u.a.e = NULL;
+		}
+	}
     v->type = LEPT_NULL;
 }
 
