@@ -143,7 +143,7 @@ static void test_parse_array() {
     EXPECT_EQ_SIZE_T(0, lept_get_array_size(&v));
     lept_free(&v);
 
-	EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, "[ null , false , true , 123 , \\\"abc\\\" ]"));
+	EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, "[ null , false , true , 123 , \"abc\" ]"));
     EXPECT_EQ_INT(LEPT_ARRAY, lept_get_type(&v));
     EXPECT_EQ_SIZE_T(5, lept_get_array_size(&v));
 
@@ -160,11 +160,11 @@ static void test_parse_array() {
 
 	e = lept_get_array_element(&v, 3);
 	EXPECT_EQ_INT(LEPT_NUMBER, lept_get_type(e));
-	EXPECT_EQ_DOUBLE(123., lept_get_number(&v));
+	EXPECT_EQ_DOUBLE(123., lept_get_number(e));
 
 	e = lept_get_array_element(&v, 4);
 	EXPECT_EQ_INT(LEPT_STRING, lept_get_type(e));
-	EXPECT_EQ_STRING("abc", lept_get_string(e), lept_get_string_length(&v));
+	EXPECT_EQ_STRING("abc", lept_get_string(e), lept_get_string_length(e));
 
     lept_free(&v);
 
