@@ -413,7 +413,8 @@ static void test_stringify_string() {
 	// it was \"\\\" \\\\ / \\b \\f \\n \\r \\t\", namely the / is directly there.
 	// However, due to doc, it shouldn't 
     TEST_ROUNDTRIP("\"\\\" \\\\ \\/ \\b \\f \\n \\r \\t\"");
-    TEST_ROUNDTRIP("\"Hello\\u0000World\"");
+    //TEST_ROUNDTRIP("\"Hello\\u0000World\"");
+    TEST_ROUNDTRIP("\"Hello\\u20ACWorld\"");
 }
 
 static void test_stringify_array() {
@@ -432,8 +433,8 @@ static void test_stringify() {
     TEST_ROUNDTRIP("true");
     test_stringify_number();
     test_stringify_string();
-    //test_stringify_array();
-    //test_stringify_object();
+    test_stringify_array();
+    test_stringify_object();
 }
 
 static void test_access_null() {
