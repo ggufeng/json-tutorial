@@ -422,10 +422,41 @@ void lept_copy(lept_value* dst, const lept_value* src) {
             lept_set_string(dst, src->u.s.s, src->u.s.len);
             break;
         case LEPT_ARRAY:
-            /* \todo */
+            /* \done */
+		{
+			lept_free(dst);
+			dst->type = LEPT_ARRAY;
+			const size_t size = src->u.a.size;
+			const size_t cap = src->u.a.capacity;
+			dst->u.a.size = size;
+			dst->u.a.capacity = cap;
+			dst->u.a.e = (lept_value*)malloc(cap * sizeof(lept_value));
+			for (size_t i = 0; i < size; ++i)
+			{
+				lept_copy(&dst->u.a.e[i], &src->u.a.e[i]);
+			}
+		}
             break;
         case LEPT_OBJECT:
-            /* \todo */
+            /* \done */
+		{
+			lept_free(dst);
+			dst->type = LEPT_OBJECT;
+			const size_t size = src->u.o.size;
+			const size_t cap = src->u.o.capacity;
+			dst->u.o.size = size;
+			dst->u.o.capacity = cap;
+			dst->u.o.m = (lept_member*)malloc(cap * sizeof(lept_member));
+			for (size_t i = 0; i < size; ++i)
+			{
+				char* key = src->u.o.m[i].k;
+				const size_t klen = src->u.o.m[i].klen;
+				memcpy(dst->u.o.m[i].k = 
+					(char*)malloc(klen + 1), key, klen);
+				dst->u.o.m[i].klen = klen;
+				lept_copy(&dst->u.o.m[i].v, &src->u.o.m[i].v);
+			}
+		}
             break;
         default:
             lept_free(dst);
