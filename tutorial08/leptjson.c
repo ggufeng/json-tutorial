@@ -620,13 +620,42 @@ void lept_popback_array_element(lept_value* v) {
 
 lept_value* lept_insert_array_element(lept_value* v, size_t index) {
     assert(v != NULL && v->type == LEPT_ARRAY && index <= v->u.a.size);
-    /* \todo */
-    return NULL;
+    /* \done */
+	// capacity
+    const size_t cap = lept_get_array_capacity(v);
+	const size_t size = lept_get_array_size(v);
+	if (cap == size)
+		lept_reserve_array(v, cap * 2);
+	// swap
+	if (size > 0)
+	{
+		for (size_t i = size; i > index; --i)
+		{
+			lept_swap(&v->u.a.e[i - 1], &v->u.a.e[i]);
+		}
+	}
+	++v->u.a.size;
+	lept_value* res = &v->u.a.e[index];
+	lept_free(res);
+	return res;
 }
 
 void lept_erase_array_element(lept_value* v, size_t index, size_t count) {
     assert(v != NULL && v->type == LEPT_ARRAY && index + count <= v->u.a.size);
-    /* \todo */
+    /* \done */
+	const size_t end_index = index + count;
+	for (size_t i = index; i < end_index; ++i)
+	{
+		lept_free(&v->u.a.e[i]);
+	}
+	// move data after removed data to new position
+	if (count != 0) {
+		for (size_t i = end_index; i < v->u.a.size; ++i)
+		{
+			lept_swap(&v->u.a.e[i], &v->u.a.e[i - count]);
+		}
+	}
+	v->u.a.size -= count;
 }
 
 void lept_set_object(lept_value* v, size_t capacity) {
