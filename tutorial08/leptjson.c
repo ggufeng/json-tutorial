@@ -500,6 +500,18 @@ int lept_is_equal(const lept_value* lhs, const lept_value* rhs) {
             return 1;
         case LEPT_OBJECT:
             /* \todo */
+			if (lhs->u.o.size != rhs->u.o.size)
+				return 0;
+            for (i = 0; i < lhs->u.a.size; i++)
+            {
+				lept_member* m = &lhs->u.o.m[i];
+				size_t j = lept_find_object_index(rhs, m->k, m->klen);
+				if (j == LEPT_KEY_NOT_EXIST)
+					return 0;
+				if (!lept_is_equal(&m->v,
+					lept_get_object_value((lept_value*)rhs, j)))
+					return 0;
+            }
             return 1;
         default:
             return 1;
