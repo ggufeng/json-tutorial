@@ -258,6 +258,11 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
     for (;;) {
         lept_init(&m.v);
         /* \done parse key to m.k, m.klen */
+		if (*c->json != '\"')
+		{
+			ret = LEPT_PARSE_MISS_KEY;
+			break;
+		}
 		if ((ret = lept_parse_string_raw(c, &m.k, &m.klen)) != LEPT_PARSE_OK)
 			break;
         /* \done parse ws colon ws */
@@ -298,7 +303,7 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
     }
     /* \done Pop and free members on the stack */
     for (size_t i = 0; i < size; i++)
-        lept_free((lept_value*)lept_context_pop(c, sizeof(lept_value)));
+        lept_free(&((lept_member*)lept_context_pop(c, sizeof(lept_member)))->v);
     return ret;
 }
 
