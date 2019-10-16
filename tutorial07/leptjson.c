@@ -346,8 +346,80 @@ int lept_parse(lept_value* v, const char* json) {
     return ret;
 }
 
+static void lept_unsigned2chars(lept_context* c, unsigned u) {
+    for (int i = 3; i >= 0; i--) {
+        char ch = (char)(u >> (8 * i));
+		if (ch > 9)
+			ch += ('A' - 10);
+		else
+			ch += '0';
+		PUTC(c, ch);
+    }
+}
+
+#define READ_ONE_CHAR(p, s, len)\
+	p = *(s)++;\
+	(len)--;
+
 static void lept_stringify_string(lept_context* c, const char* s, size_t len) {
-    /* ... */
+	PUTC(c, '\"');
+	char p;
+	while (len != 0)
+	{
+		READ_ONE_CHAR(p, s, len);
+		switch (p) {
+			case '\"': PUTS(c, "\\\"", 2); break;
+			case '\\': PUTS(c, "\\\\", 2); break;
+			case '/':  PUTS(c, "\\/" , 2); break;
+			case '\b':  PUTS(c, "\\b", 2); break;
+			case '\f':  PUTS(c, "\\f", 2); break;
+			case '\n':  PUTS(c, "\\n", 2); break;
+			case '\r':  PUTS(c, "\\r", 2); break;
+			case '\t':  PUTS(c, "\\t", 2); break;
+			case '\0':  PUTS(c, "\\u0000", 6); break;
+			default:
+			if (p < 0x20) // change to form \u00xx
+			{
+				PUTS(c, "\\u", 2); 
+				unsigned u = 0u;
+				//int num_bytes; // todo: use this to refactor
+				if ((p & 0xE0) == 0xC0)
+				{
+					const unsigned u1 = p & 0x1F;
+					READ_ONE_CHAR(p, s, len);
+					const unsigned u2 = p & 0x3F;
+					u = u2 + (u1 << 6);
+					lept_unsigned2chars(c, u);
+				} else if ((p & 0xF0) == 0xE0)
+				{
+					const unsigned u1 = p & 0x0F;
+					READ_ONE_CHAR(p, s, len);
+					const unsigned u2 = p & 0x3F;
+					READ_ONE_CHAR(p, s, len);
+					const unsigned u3 = p & 0x3F;
+					u = u3 + (u2 << 6) + (u1 << 12);
+					lept_unsigned2chars(c, u);
+				} else // 4 bytes
+				{
+					const unsigned u1 = p & 0x07;
+					READ_ONE_CHAR(p, s, len);
+					const unsigned u2 = p & 0x3F;
+					READ_ONE_CHAR(p, s, len);
+					const unsigned u3 = p & 0x3F;
+					READ_ONE_CHAR(p, s, len);
+					const unsigned u4 = p & 0x3F;
+					u = u4 + (u3 << 6) + (u2 << 12) + (u1 << 18);
+					u -= 0x10000;
+					const unsigned uH = (u >> 10) + 0xD800;
+					const unsigned uL = u & 0x3FF + 0xDC00;
+					lept_unsigned2chars(c, uH);
+					lept_unsigned2chars(c, uL);
+				}
+			} else 
+				PUTC(c, p); 
+		}
+	}
+	PUTC(c, '\"');
 }
 
 static void lept_stringify_value(lept_context* c, const lept_value* v) {

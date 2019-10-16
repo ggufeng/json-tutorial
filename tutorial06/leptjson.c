@@ -310,7 +310,7 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
 		free(member->k);
 		member->klen = 0;
 	}
-	if (m.k != NULL)
+	//if (m.k != NULL)
 		free(m.k);
     return ret;
 }
